@@ -60,6 +60,15 @@ async def summarize(request: SummarizeRequest, req: Request) -> SummaryResponse:
             result = await llm_service.summarize_repo(processed)
             return result
 
+        except HTTPException:
+            # Re-raise HTTP exceptions as-is
+            raise
+        except Exception as inner_error:
+            # Catch any other exception and provide more info
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error: {type(inner_error).__name__}: {str(inner_error)}"
+            )
         finally:
             await github_service.close()
 
