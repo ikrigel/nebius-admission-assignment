@@ -34,8 +34,8 @@ class Settings(BaseSettings):
             return self.llm_model
 
         defaults = {
-            "nebius": "llama-3.1-70b-instruct",
-            "openai": "gpt-4o-mini",
+            "nebius": "nvidia/Llama-3_1-Nemotron-Ultra-253B-v1",
+            "openai": "gpt-3.5-turbo",
             "anthropic": "claude-3-haiku-20240307",
             "gemini": "gemini-1.5-flash",
             "perplexity": "sonar",
