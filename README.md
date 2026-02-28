@@ -15,6 +15,10 @@ A web application that analyzes GitHub repositories using Large Language Models 
 - **Key Management**: Delete individual API keys or clear all credentials with one click
 - **Persistent Settings**: All data stored locally in browser—no server-side storage
 
+## Live Demo
+
+🚀 **Deployed on Vercel** - Coming soon at your Vercel URL
+
 ## Prerequisites
 
 - Python 3.10 or higher
