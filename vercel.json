@@ -4,6 +4,8 @@
   "framework": "vite",
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.py", "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"] },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/index.html", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/index.html", "status": 200 }
   ]
 }
