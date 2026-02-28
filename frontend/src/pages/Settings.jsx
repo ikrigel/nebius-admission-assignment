@@ -15,6 +15,8 @@ import {
   Alert,
   Box,
   useTheme,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
@@ -35,10 +37,12 @@ const Settings = () => {
   const [settings, setSettings] = useState({ activeProvider: 'nebius', keys: {} })
   const [showKeys, setShowKeys] = useState({})
   const [message, setMessage] = useState(null)
+  const [logLevel, setLogLevel] = useState(Logger.getLogLevel())
 
   useEffect(() => {
     const saved = StorageService.getSettings()
     setSettings(saved)
+    setLogLevel(Logger.getLogLevel())
     Logger.info('Settings page loaded')
   }, [])
 
@@ -61,9 +65,16 @@ const Settings = () => {
 
   const handleSave = () => {
     StorageService.saveSettings(settings)
-    Logger.info(`Settings saved. Active provider: ${settings.activeProvider}`)
+    Logger.setLogLevel(logLevel)
+    Logger.info(`Settings saved. Active provider: ${settings.activeProvider}, Log level: ${logLevel}`)
     setMessage({ type: 'success', text: 'Settings saved successfully!' })
     setTimeout(() => setMessage(null), 3000)
+  }
+
+  const handleLogLevelChange = (e, newLevel) => {
+    if (newLevel !== null) {
+      setLogLevel(newLevel)
+    }
   }
 
   const toggleShowKey = (providerId) => {
@@ -163,6 +174,37 @@ const Settings = () => {
           </Grid>
         ))}
       </Grid>
+
+      <Box sx={{ mb: 4, p: 3, backgroundColor: theme.palette.background.default, borderRadius: 1 }}>
+        <Typography variant="h5" sx={{ mb: 3 }}>
+          Logging
+        </Typography>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+          Control the verbosity of application logs:
+        </Typography>
+        <Stack spacing={1}>
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>Log Level:</Typography>
+            <ToggleButtonGroup
+              value={logLevel}
+              exclusive
+              onChange={handleLogLevelChange}
+              size="small"
+            >
+              <ToggleButton value="NONE">None</ToggleButton>
+              <ToggleButton value="ERROR">Errors Only</ToggleButton>
+              <ToggleButton value="INFO">Info</ToggleButton>
+              <ToggleButton value="VERBOSE">Verbose</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <Typography variant="caption" color="textSecondary">
+            • <strong>None:</strong> No logs<br/>
+            • <strong>Errors Only:</strong> Only error messages<br/>
+            • <strong>Info:</strong> Errors + info messages (default)<br/>
+            • <strong>Verbose:</strong> All messages including debug logs
+          </Typography>
+        </Stack>
+      </Box>
 
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Button

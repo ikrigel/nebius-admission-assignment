@@ -46,11 +46,19 @@ const Home = () => {
 
     // Load last search
     const lastState = StorageService.getPageState('home')
-    if (lastState) {
-      setUrl(lastState.url)
-      setResult(lastState.result)
+    if (lastState && lastState.url) {
+      setUrl(lastState.url || '')
+      setResult(lastState.result || null)
     }
+    Logger.info('Home page loaded')
   }, [])
+
+  // Auto-save URL whenever it changes
+  useEffect(() => {
+    if (url || result) {
+      StorageService.savePageState('home', { url, result })
+    }
+  }, [url, result])
 
   const handleSearch = async (e) => {
     e.preventDefault()

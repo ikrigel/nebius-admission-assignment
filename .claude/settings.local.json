@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote add origin https://github.com/ikrigel/nebius-admission-assignment.git)",
+      "Bash(git branch -M master)"
+    ]
+  }
+}
