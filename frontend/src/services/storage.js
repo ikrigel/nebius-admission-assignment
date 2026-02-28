@@ -6,6 +6,7 @@ const KEYS = {
   HISTORY: 'rsum_history',
   SETTINGS: 'rsum_settings',
   LOGS: 'rsum_logs',
+  GITHUB_TOKEN: 'rsum_github_token',
   PAGE_STATE: (page) => `rsum_page_${page}`,
 }
 
@@ -84,6 +85,27 @@ class StorageServiceClass {
       localStorage.setItem(KEYS.PAGE_STATE(page), JSON.stringify(state))
     } catch (e) {
       console.error('Failed to save page state:', e)
+    }
+  }
+
+  // GitHub token management
+  getGithubToken() {
+    try {
+      return localStorage.getItem(KEYS.GITHUB_TOKEN) || ''
+    } catch (e) {
+      return ''
+    }
+  }
+
+  saveGithubToken(token) {
+    try {
+      if (token) {
+        localStorage.setItem(KEYS.GITHUB_TOKEN, token)
+      } else {
+        localStorage.removeItem(KEYS.GITHUB_TOKEN)
+      }
+    } catch (e) {
+      console.error('Failed to save GitHub token:', e)
     }
   }
 

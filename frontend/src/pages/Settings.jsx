@@ -21,6 +21,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { StorageService } from '../services/storage'
 import { Logger } from '../services/logger'
 
@@ -36,6 +37,8 @@ const Settings = () => {
   const theme = useTheme()
   const [settings, setSettings] = useState({ activeProvider: 'nebius', keys: {} })
   const [showKeys, setShowKeys] = useState({})
+  const [showGithubToken, setShowGithubToken] = useState(false)
+  const [githubToken, setGithubToken] = useState('')
   const [message, setMessage] = useState(null)
   const [logLevel, setLogLevel] = useState(Logger.getLogLevel())
 
@@ -43,6 +46,10 @@ const Settings = () => {
     const saved = StorageService.getSettings()
     setSettings(saved)
     setLogLevel(Logger.getLogLevel())
+
+    // Load GitHub token
+    const token = StorageService.getGithubToken()
+    setGithubToken(token || '')
     Logger.info('Settings page loaded')
   }, [])
 
@@ -66,6 +73,7 @@ const Settings = () => {
   const handleSave = () => {
     StorageService.saveSettings(settings)
     Logger.setLogLevel(logLevel)
+    StorageService.saveGithubToken(githubToken)
     Logger.info(`Settings saved. Active provider: ${settings.activeProvider}, Log level: ${logLevel}`)
     setMessage({ type: 'success', text: 'Settings saved successfully!' })
     setTimeout(() => setMessage(null), 3000)
@@ -74,6 +82,38 @@ const Settings = () => {
   const handleLogLevelChange = (e, newLevel) => {
     if (newLevel !== null) {
       setLogLevel(newLevel)
+    }
+  }
+
+  const handleDeleteKey = (providerId) => {
+    setSettings(prev => ({
+      ...prev,
+      keys: {
+        ...prev.keys,
+        [providerId]: '',
+      },
+    }))
+    Logger.info(`Deleted API key for ${providerId}`)
+    setMessage({ type: 'info', text: `API key for ${providerId} deleted` })
+    setTimeout(() => setMessage(null), 3000)
+  }
+
+  const handleDeleteGithubToken = () => {
+    setGithubToken('')
+    Logger.info('Deleted GitHub token')
+    setMessage({ type: 'info', text: 'GitHub token deleted' })
+    setTimeout(() => setMessage(null), 3000)
+  }
+
+  const handleClearAllKeys = () => {
+    if (window.confirm('Are you sure you want to delete all API keys and tokens? This cannot be undone.')) {
+      setSettings({ activeProvider: 'nebius', keys: {} })
+      setGithubToken('')
+      StorageService.saveSettings({ activeProvider: 'nebius', keys: {} })
+      StorageService.saveGithubToken('')
+      Logger.warn('All API keys and tokens cleared')
+      setMessage({ type: 'warning', text: 'All keys and tokens have been deleted' })
+      setTimeout(() => setMessage(null), 3000)
     }
   }
 
@@ -159,21 +199,98 @@ const Settings = () => {
                   >
                     Get API Key
                   </Button>
-                  <Button
-                    fullWidth
-                    variant={settings.activeProvider === provider.id ? 'contained' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    onClick={() => handleSelectProvider(provider.id)}
-                  >
-                    {settings.activeProvider === provider.id ? 'Active' : 'Use This Provider'}
-                  </Button>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      fullWidth
+                      variant={settings.activeProvider === provider.id ? 'contained' : 'outlined'}
+                      color="primary"
+                      size="small"
+                      onClick={() => handleSelectProvider(provider.id)}
+                    >
+                      {settings.activeProvider === provider.id ? 'Active' : 'Use This Provider'}
+                    </Button>
+                    {settings.keys[provider.id] && (
+                      <Button
+                        size="small"
+                        color="error"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => handleDeleteKey(provider.id)}
+                        title="Delete this API key"
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </Stack>
                 </Stack>
               </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      <Box sx={{ mb: 4, p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
+        <Typography variant="h5" sx={{ mb: 3 }}>
+          GitHub Token (Optional)
+        </Typography>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+          Add a GitHub Personal Access Token to increase the API rate limit from 60 to 5,000 requests per hour. This helps when analyzing large repositories or making many requests.
+        </Typography>
+
+        <Stack spacing={2}>
+          <TextField
+            fullWidth
+            label="GitHub Personal Access Token"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            type={showGithubToken ? 'text' : 'password'}
+            value={githubToken}
+            onChange={(e) => setGithubToken(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => setShowGithubToken(!showGithubToken)}
+                    edge="end"
+                  >
+                    {showGithubToken ? (
+                      <VisibilityOffIcon fontSize="small" />
+                    ) : (
+                      <VisibilityIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Stack direction="row" spacing={2}>
+            <Button
+              size="small"
+              variant="text"
+              endIcon={<OpenInNewIcon />}
+              href="https://github.com/settings/tokens/new"
+              target="_blank"
+            >
+              Create Token
+            </Button>
+            {githubToken && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={handleDeleteGithubToken}
+              >
+                Delete Token
+              </Button>
+            )}
+          </Stack>
+
+          <Typography variant="caption" color="textSecondary">
+            Required scopes: <code>repo</code>, <code>public_repo</code>
+          </Typography>
+        </Stack>
+      </Box>
 
       <Box sx={{ mb: 4, p: 3, backgroundColor: theme.palette.background.default, borderRadius: 1 }}>
         <Typography variant="h5" sx={{ mb: 3 }}>
@@ -206,7 +323,7 @@ const Settings = () => {
         </Stack>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <Button
           variant="contained"
           color="primary"
@@ -214,6 +331,15 @@ const Settings = () => {
           onClick={handleSave}
         >
           Save Settings
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          size="large"
+          startIcon={<DeleteIcon />}
+          onClick={handleClearAllKeys}
+        >
+          Clear All Keys & Tokens
         </Button>
       </Box>
 

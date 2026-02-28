@@ -41,8 +41,11 @@ async def summarize(request: SummarizeRequest, req: Request) -> SummaryResponse:
                 detail="Invalid GitHub URL. Expected: https://github.com/owner/repo"
             )
 
+        # Get GitHub token from request headers (if provided by frontend) or use env var
+        github_token = req.headers.get("X-Github-Token") or settings.github_token
+
         # Fetch repository tree
-        github_service = GitHubService(github_token=settings.github_token)
+        github_service = GitHubService(github_token=github_token)
         try:
             # Process repository
             processor = RepoProcessor()

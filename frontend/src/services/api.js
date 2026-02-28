@@ -7,6 +7,7 @@ import { StorageService } from './storage'
 class ApiServiceClass {
   async summarize(githubUrl) {
     const settings = StorageService.getSettings()
+    const githubToken = StorageService.getGithubToken()
 
     const headers = {
       'Content-Type': 'application/json',
@@ -18,6 +19,10 @@ class ApiServiceClass {
     }
     if (settings.keys[settings.activeProvider]) {
       headers['X-Api-Key'] = settings.keys[settings.activeProvider]
+    }
+    // Pass GitHub token if available
+    if (githubToken) {
+      headers['X-Github-Token'] = githubToken
     }
 
     // Get base URL (works for both local dev and production)
