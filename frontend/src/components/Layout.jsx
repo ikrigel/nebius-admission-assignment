@@ -19,6 +19,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import HelpIcon from '@mui/icons-material/Help'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { NavLink, useLocation } from 'react-router-dom'
+import LogPanel from './LogPanel'
 
 const DRAWER_WIDTH = 240
 
@@ -124,10 +125,14 @@ const Layout = ({ children }) => {
           mt: '64px', // AppBar height
           ml: { md: `${DRAWER_WIDTH}px` },
           minHeight: '100vh',
+          pb: '50px', // Space for log panel
         }}
       >
         {children}
       </Box>
+
+      {/* Log Panel */}
+      <LogPanel />
     </Box>
   )
 }
