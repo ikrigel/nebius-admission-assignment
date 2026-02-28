@@ -107,19 +107,6 @@ class AnthropicProvider(LLMProvider):
         return response.content[0].text
 
 
-class GeminiProvider(LLMProvider):
-    """Google Gemini provider."""
-
-    def __init__(self, api_key: str, model: str):
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model)
-
-    async def complete(self, system: str, user: str) -> str:
-        response = self.model.generate_content(f"{system}\n\n{user}")
-        return response.text
-
-
 class LLMService:
     """Multi-provider LLM service."""
 
@@ -127,7 +114,6 @@ class LLMService:
         "nebius": NebiusProvider,
         "openai": OpenAIProvider,
         "anthropic": AnthropicProvider,
-        "gemini": GeminiProvider,
         "perplexity": PerplexityProvider,
     }
 

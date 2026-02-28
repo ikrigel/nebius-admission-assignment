@@ -18,7 +18,6 @@ class Settings:
     nebius_api_key: str
     openai_api_key: str
     anthropic_api_key: str
-    gemini_api_key: str
     perplexity_api_key: str
     llm_model: str
     github_token: str
@@ -28,7 +27,6 @@ class Settings:
         self.nebius_api_key = os.getenv("NEBIUS_API_KEY", "")
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "")
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
         self.perplexity_api_key = os.getenv("PERPLEXITY_API_KEY", "")
         self.llm_model = os.getenv("LLM_MODEL", "")
         self.github_token = os.getenv("GITHUB_TOKEN", "")
@@ -39,7 +37,6 @@ class Settings:
             "nebius": self.nebius_api_key,
             "openai": self.openai_api_key,
             "anthropic": self.anthropic_api_key,
-            "gemini": self.gemini_api_key,
             "perplexity": self.perplexity_api_key,
         }
         return keys.get(self.llm_provider, "")
@@ -53,7 +50,6 @@ class Settings:
             "nebius": "nvidia/Llama-3_1-Nemotron-Ultra-253B-v1",
             "openai": "gpt-3.5-turbo",
             "anthropic": "claude-3-haiku-20240307",
-            "gemini": "gemini-1.5-flash",
             "perplexity": "sonar",
         }
         return defaults.get(self.llm_provider, "")
