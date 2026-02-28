@@ -27,7 +27,7 @@ class GitHubService:
     async def get_session(self) -> httpx.AsyncClient:
         """Get or create the async HTTP session."""
         if not self.session:
-            headers = {}
+            headers = {"Accept": "application/vnd.github+json"}
             if self.github_token:
                 headers["Authorization"] = f"token {self.github_token}"
             self.session = httpx.AsyncClient(
@@ -58,7 +58,7 @@ class GitHubService:
 
         owner, repo, branch = match.groups()
         repo = repo.rstrip(".git")
-        branch = branch or "HEAD"
+        branch = branch or "main"  # Changed from HEAD to main
         return owner, repo, branch
 
     async def get_repo_tree(self, url: str) -> tuple[str, str, list[dict]]:
@@ -70,28 +70,13 @@ class GitHubService:
         session = await self.get_session()
 
         try:
-            # If branch is HEAD, get the default branch first
-            if branch == "HEAD":
-                repo_response = await session.get(f"/repos/{owner}/{repo}")
-                if repo_response.status_code == 404:
-                    raise HTTPException(
-                        status_code=404,
-                        detail="Repository not found or is private."
-                    )
-                if repo_response.status_code == 403:
-                    raise HTTPException(
-                        status_code=429,
-                        detail="GitHub API rate limit exceeded."
-                    )
-                repo_data = repo_response.json()
-                branch = repo_data.get("default_branch", "main")
-
             # Get the commit SHA for the branch
-            ref_response = await session.get(f"/repos/{owner}/{repo}/git/ref/heads/{branch.split('/')[-1]}")
+            ref_response = await session.get(f"/repos/{owner}/{repo}/git/ref/heads/{branch}")
             if ref_response.status_code == 404:
+                error_detail = f"GitHub API returned 404. URL: /repos/{owner}/{repo}/git/ref/heads/{branch}. Response: {ref_response.text[:200]}"
                 raise HTTPException(
                     status_code=404,
-                    detail="Repository not found or is private."
+                    detail=error_detail
                 )
             if ref_response.status_code == 403:
                 raise HTTPException(
