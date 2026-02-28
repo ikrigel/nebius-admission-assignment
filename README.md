@@ -10,6 +10,9 @@ A web application that analyzes GitHub repositories using Large Language Models 
 - **Search History**: Automatically tracks all analyzed repositories with timestamps and export to CSV
 - **Responsive Design**: Works seamlessly on mobile, tablet, and desktop screens
 - **Application Logging**: Built-in log panel with DEBUG, INFO, WARNING, ERROR levels and export functionality
+- **Configurable Log Levels**: Choose logging verbosity (None, Errors Only, Info, Verbose)
+- **GitHub Token Support**: Add Personal Access Token to increase API rate limits (60 → 5,000 req/hr)
+- **Key Management**: Delete individual API keys or clear all credentials with one click
 - **Persistent Settings**: All data stored locally in browser—no server-side storage
 
 ## Prerequisites
@@ -55,6 +58,10 @@ NEBIUS_API_KEY=v1.CmQKHHN0YXRpY2tleXMtZTAw...
 ### 3. Start Backend Server (Terminal 1)
 
 ```bash
+# Using python -m (recommended if uvicorn command not found)
+python -m uvicorn backend.main:app --reload --port 8000
+
+# Or directly if uvicorn is on PATH
 uvicorn backend.main:app --reload --port 8000
 ```
 
@@ -223,6 +230,34 @@ The `vercel.json` automatically:
 - Deploys Python backend as serverless functions
 - Routes `/api/*` to Python, everything else to React
 
+## Settings & Configuration
+
+### LLM Provider Settings
+Go to **Settings** page to:
+- Select your preferred LLM provider
+- Enter your API key (saved locally, never sent to servers)
+- Delete individual API keys with one click
+
+### GitHub Token (Optional)
+Add a GitHub Personal Access Token to improve API rate limits:
+- **Without token**: 60 requests/hour
+- **With token**: 5,000 requests/hour
+
+Steps:
+1. Go to https://github.com/settings/tokens/new
+2. Create token with `repo` and `public_repo` scopes
+3. Go to **Settings** → **GitHub Token** section
+4. Paste token and click **Save Settings**
+
+### Logging Configuration
+Control application logging verbosity in **Settings**:
+- **None**: No logs displayed
+- **Errors Only**: Only error messages
+- **Info** (default): Errors + info messages
+- **Verbose**: All messages including debug logs
+
+View logs in the collapsible panel at the bottom of the page.
+
 ## Environment Variables
 
 All variables are optional except you need at least one LLM API key:
@@ -240,6 +275,8 @@ PERPLEXITY_API_KEY=pplx-...           # Required if using Perplexity
 # GitHub (Optional, raises rate limit from 60 to 5000 req/hr)
 GITHUB_TOKEN=ghp_...                  # Optional GitHub PAT
 ```
+
+**Note**: API keys can be configured in the web interface (Settings page) without using environment variables.
 
 ## Troubleshooting
 
