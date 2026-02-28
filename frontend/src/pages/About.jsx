@@ -1,4 +1,6 @@
-import { Container, Typography, Paper, Stack, Chip, Link, Box } from '@mui/material'
+import { Container, Typography, Paper, Stack, Chip, Link, Box, Button, Avatar } from '@mui/material'
+import GitHubIcon from '@mui/icons-material/GitHub'
+import LinkedInIcon from '@mui/icons-material/LinkedIn'
 
 const About = () => {
   return (
@@ -108,6 +110,83 @@ const About = () => {
                 View on GitHub
               </Link>
             </Typography>
+          </Box>
+
+          <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.1)', pt: 3 }}>
+            <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+              About the Programmer
+            </Typography>
+
+            <Stack spacing={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Avatar
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    backgroundColor: 'primary.main',
+                    fontSize: '3rem',
+                  }}
+                >
+                  IK
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    Isaac Krigel
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" paragraph>
+                    Full-stack developer passionate about building intelligent applications with modern AI and web technologies. Experienced in Python, JavaScript, and cloud platforms.
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Connect
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<LinkedInIcon />}
+                    href="https://www.linkedin.com/in/ikrigel/"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    LinkedIn
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<GitHubIcon />}
+                    href="https://github.com/ikrigel"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    GitHub
+                  </Button>
+                </Stack>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Skills & Technologies
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                  {[
+                    'Python',
+                    'JavaScript/TypeScript',
+                    'React',
+                    'FastAPI',
+                    'Full-Stack Development',
+                    'AI/LLM Integration',
+                    'Cloud Platforms',
+                    'System Design',
+                  ].map(skill => (
+                    <Chip key={skill} label={skill} size="small" variant="outlined" />
+                  ))}
+                </Stack>
+              </Box>
+            </Stack>
           </Box>
         </Stack>
       </Paper>
