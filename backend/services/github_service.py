@@ -70,6 +70,22 @@ class GitHubService:
         session = await self.get_session()
 
         try:
+            # If branch is HEAD, get the default branch first
+            if branch == "HEAD":
+                repo_response = await session.get(f"/repos/{owner}/{repo}")
+                if repo_response.status_code == 404:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Repository not found or is private."
+                    )
+                if repo_response.status_code == 403:
+                    raise HTTPException(
+                        status_code=429,
+                        detail="GitHub API rate limit exceeded."
+                    )
+                repo_data = repo_response.json()
+                branch = repo_data.get("default_branch", "main")
+
             # Get the commit SHA for the branch
             ref_response = await session.get(f"/repos/{owner}/{repo}/git/ref/heads/{branch.split('/')[-1]}")
             if ref_response.status_code == 404:

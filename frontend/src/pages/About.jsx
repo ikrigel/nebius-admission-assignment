@@ -131,7 +131,7 @@ const About = () => {
                 </Avatar>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="h6" sx={{ mb: 1 }}>
-                    Isaac Krigel
+                    Igal Krigel
                   </Typography>
                   <Typography variant="body2" color="textSecondary" paragraph>
                     Full-stack developer passionate about building intelligent applications with modern AI and web technologies. Experienced in Python, JavaScript, and cloud platforms.
