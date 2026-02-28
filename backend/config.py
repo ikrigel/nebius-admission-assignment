@@ -1,21 +1,37 @@
-from pydantic_settings import BaseSettings
+import os
+from dataclasses import dataclass
 from typing import Literal
 
+# Load .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
-class Settings(BaseSettings):
+
+@dataclass
+class Settings:
     """Configuration loaded from environment variables."""
 
-    llm_provider: Literal["nebius", "openai", "anthropic", "gemini", "perplexity"] = "nebius"
-    nebius_api_key: str = ""
-    openai_api_key: str = ""
-    anthropic_api_key: str = ""
-    gemini_api_key: str = ""
-    perplexity_api_key: str = ""
-    llm_model: str = ""  # Empty = use provider default
-    github_token: str = ""  # Optional, raises rate limit from 60 to 5000 req/hr
+    llm_provider: str
+    nebius_api_key: str
+    openai_api_key: str
+    anthropic_api_key: str
+    gemini_api_key: str
+    perplexity_api_key: str
+    llm_model: str
+    github_token: str
 
-    class Config:
-        env_file = ".env"
+    def __init__(self):
+        self.llm_provider = os.getenv("LLM_PROVIDER", "nebius")
+        self.nebius_api_key = os.getenv("NEBIUS_API_KEY", "")
+        self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+        self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
+        self.perplexity_api_key = os.getenv("PERPLEXITY_API_KEY", "")
+        self.llm_model = os.getenv("LLM_MODEL", "")
+        self.github_token = os.getenv("GITHUB_TOKEN", "")
 
     def get_api_key(self) -> str:
         """Get the API key for the active provider."""
