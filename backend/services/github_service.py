@@ -85,6 +85,11 @@ class GitHubService:
                 )
 
             ref_data = ref_response.json()
+            if "object" not in ref_data:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Unexpected GitHub API response. Expected 'object' key. Got: {ref_data}"
+                )
             sha = ref_data["object"]["sha"]
 
             # Get the full tree recursively

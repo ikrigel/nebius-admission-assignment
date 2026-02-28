@@ -34,7 +34,7 @@ class Settings(BaseSettings):
             return self.llm_model
 
         defaults = {
-            "nebius": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+            "nebius": "llama-3.1-70b-instruct",
             "openai": "gpt-4o-mini",
             "anthropic": "claude-3-haiku-20240307",
             "gemini": "gemini-1.5-flash",
