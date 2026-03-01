@@ -93,7 +93,15 @@ const Layout = ({ children }) => {
               <MenuIcon />
             </IconButton>
           )}
-          <span style={{ fontSize: '1.5rem', fontWeight: 600 }}>RepoSummarizer</span>
+          <Box
+            sx={{
+              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              fontWeight: 600,
+              flexGrow: isMobile ? 0 : 1,
+            }}
+          >
+            RepoSummarizer
+          </Box>
         </Toolbar>
       </AppBar>
 
