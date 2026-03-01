@@ -46,19 +46,28 @@ async def serve_frontend(full_path: str):
     static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
     index_file = os.path.join(static_dir, "index.html")
 
-    # Try to serve the requested file first (for assets like JS, CSS)
-    requested_file = os.path.join(static_dir, full_path)
+    # Normalize path and check for directory traversal
+    requested_file = os.path.normpath(os.path.join(static_dir, full_path))
+
+    # Security: ensure requested_file is within static_dir
+    if not requested_file.startswith(os.path.normpath(static_dir)):
+        logger.warning(f"⚠️ Path traversal attempt: {full_path}")
+        return {"detail": "Not Found"}
+
     logger.debug(f"📁 Checking file: {requested_file}")
 
+    # Try to serve static assets (JS, CSS, images, etc.)
     if os.path.isfile(requested_file):
-        logger.info(f"✅ Serving file: {requested_file}")
+        logger.info(f"✅ Serving asset: {requested_file}")
         return FileResponse(requested_file)
 
-    # Fall back to index.html for SPA routing
-    logger.debug(f"📄 File not found, falling back to index.html")
-    if os.path.isfile(index_file):
-        logger.info(f"✅ Serving index.html for SPA routing")
-        return FileResponse(index_file, media_type="text/html")
+    # For SPA routing: if it's a route (not a file), serve index.html
+    # But don't serve index.html for explicit file requests
+    if "." not in os.path.basename(full_path) or full_path == "":
+        logger.debug(f"📄 Route not found, falling back to index.html for SPA routing")
+        if os.path.isfile(index_file):
+            logger.info(f"✅ Serving index.html for SPA routing")
+            return FileResponse(index_file, media_type="text/html")
 
-    logger.error(f"❌ index.html not found at {index_file}")
+    logger.error(f"❌ File not found: {requested_file}")
     return {"detail": "Not Found"}
