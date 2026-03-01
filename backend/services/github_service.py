@@ -90,8 +90,18 @@ class GitHubService:
             ref_response = await session.get(api_url)
             logger.debug(f"📊 Branch ref response status: {ref_response.status_code}")
 
+            # If main branch not found, try master as fallback
+            if ref_response.status_code == 404 and branch == "main":
+                logger.info(f"⚠️  Branch 'main' not found, trying 'master'...")
+                branch = "master"
+                api_url = f"/repos/{owner}/{repo}/git/ref/heads/{branch}"
+                logger.info(f"🌐 Retrying with: {api_url}")
+                ref_response = await session.get(api_url)
+                logger.debug(f"📊 Branch ref response status: {ref_response.status_code}")
+
             if ref_response.status_code == 404:
                 error_detail = f"GitHub API returned 404. URL: /repos/{owner}/{repo}/git/ref/heads/{branch}. Response: {ref_response.text[:200]}"
+                logger.error(f"❌ {error_detail}")
                 raise HTTPException(
                     status_code=404,
                     detail=error_detail
