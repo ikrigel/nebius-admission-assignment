@@ -1,10 +1,13 @@
 import json
 import re
+import logging
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import Optional
 from .repo_processor import ProcessedRepo
 from backend.config import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class SummaryResponse(BaseModel):
@@ -53,17 +56,45 @@ class OpenAIProvider(LLMProvider):
         from openai import AsyncOpenAI
         self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
+        logger.info(f"🟢 OpenAI provider initialized with model: {self.model}")
 
     async def complete(self, system: str, user: str) -> str:
-        response = await self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            temperature=0.3,
-        )
-        return response.choices[0].message.content
+        logger.info(f"🌐 Calling OpenAI API with model: {self.model}")
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+                temperature=0.3,
+            )
+            logger.info(f"✅ OpenAI API call successful")
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"❌ OpenAI API error: {str(e)}")
+            # If model not found, try fallback models
+            if "invalid model" in str(e).lower():
+                fallback_models = ["gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"]
+                for fallback_model in fallback_models:
+                    try:
+                        logger.info(f"🔄 Trying fallback model: {fallback_model}")
+                        response = await self.client.chat.completions.create(
+                            model=fallback_model,
+                            messages=[
+                                {"role": "system", "content": system},
+                                {"role": "user", "content": user},
+                            ],
+                            temperature=0.3,
+                        )
+                        logger.info(f"✅ Fallback model {fallback_model} successful")
+                        return response.choices[0].message.content
+                    except Exception as fallback_error:
+                        logger.warning(f"⚠️  Fallback {fallback_model} failed: {str(fallback_error)}")
+                        continue
+                # If all fallbacks failed
+                raise Exception(f"No available OpenAI models. Original error: {str(e)}")
+            raise
 
 
 class PerplexityProvider(LLMProvider):
@@ -123,14 +154,20 @@ class LLMService:
         api_key = api_key_override or settings.get_api_key()
         model = settings.get_model()
 
+        logger.info(f"🟣 LLMService init - Provider: {provider_name}, Model: {model}")
+
         if not api_key:
+            logger.error(f"❌ No API key for provider: {provider_name}")
             raise ValueError(f"API key not provided for provider: {provider_name}")
 
         provider_cls = self.PROVIDER_REGISTRY.get(provider_name)
         if not provider_cls:
+            logger.error(f"❌ Unknown provider: {provider_name}")
             raise ValueError(f"Unknown provider: {provider_name}")
 
+        logger.info(f"🟣 Initializing provider: {provider_name}")
         self.provider = provider_cls(api_key, model)
+        logger.info(f"✅ LLMService initialized successfully")
 
     async def summarize_repo(self, processed: ProcessedRepo) -> SummaryResponse:
         """Generate summary for a processed repository."""
