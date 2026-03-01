@@ -14,6 +14,8 @@ A web application that analyzes GitHub repositories using Large Language Models 
 - **GitHub Token Support**: Add Personal Access Token to increase API rate limits (60 → 5,000 req/hr)
 - **Key Management**: Delete individual API keys or clear all credentials with one click
 - **Persistent Settings**: All data stored locally in browser—no server-side storage
+- **Comprehensive Testing**: 48 automated tests covering configuration, GitHub API, file filtering, and endpoints
+- **Frontend Debugging**: Browser console utilities for performance monitoring, state inspection, and timing
 
 ## Live Demo
 
@@ -82,7 +84,35 @@ You should see: `Local: http://localhost:5173/`
 
 ## Testing the Application
 
-### Web Interface
+### Automated Tests
+
+Run the comprehensive test suite with pytest:
+
+```bash
+# Run all tests (48 tests)
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_config.py
+
+# Run with coverage report
+pip install pytest-cov
+pytest --cov=backend --cov-report=html
+```
+
+**Test Coverage**:
+- ✅ Configuration & settings validation
+- ✅ GitHub API URL parsing & language detection
+- ✅ File filtering & priority scoring
+- ✅ FastAPI endpoints & SPA routing
+- ✅ Path traversal attack protection
+
+See [TESTING.md](./TESTING.md) for complete testing guide.
+
+### Manual Web Interface Testing
 
 1. Open http://localhost:5173 in your browser
 2. Go to **Settings** page (left menu)
@@ -109,6 +139,16 @@ Expected response:
   "structure": "The project follows a standard Python package layout with source code in src/, comprehensive tests, and detailed documentation..."
 }
 ```
+
+### Debug Mode
+
+**Frontend Debugging**:
+- Access debug utilities: `window.DEBUG` in browser console
+- Enable debug mode: Add `?debug=true` to URL
+- Performance monitoring: `DEBUG.logPerformance()`
+- State inspection: `DEBUG.logState('name', state)`
+
+See [TESTING.md](./TESTING.md#frontend-testing) for complete debugging guide.
 
 ## Model Selection
 
@@ -194,15 +234,24 @@ nebius-admission-assignment/
 │   │       ├── api.js         # Backend API client
 │   │       ├── storage.js     # LocalStorage wrapper
 │   │       ├── logger.js      # Logging service
-│   │       └── csv.js         # Export service
+│   │       ├── csv.js         # Export service
+│   │       └── debug.js       # Debug utilities (console logging)
 │   ├── package.json
 │   └── vite.config.js
+├── tests/                     # Automated test suite (48 tests)
+│   ├── test_config.py         # Configuration tests
+│   ├── test_github_service.py # GitHub API tests
+│   ├── test_repo_processor.py # File filtering tests
+│   └── test_main.py           # FastAPI endpoint tests
 ├── api/
 │   └── index.py               # Vercel serverless entry
 ├── requirements.txt           # Python dependencies
-├── .env.example              # Environment template
-├── vercel.json               # Vercel deployment config
-└── README.md                 # This file
+├── .env.example               # Environment template
+├── vercel.json                # Vercel deployment config
+├── pytest.ini                 # Pytest configuration
+├── conftest.py                # Pytest fixtures & setup
+├── TESTING.md                 # Testing & debugging guide
+└── README.md                  # This file
 ```
 
 ## Deployment to Vercel
