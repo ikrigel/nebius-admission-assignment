@@ -1,9 +1,12 @@
 import httpx
 import base64
 import re
+import logging
 from dataclasses import dataclass
 from typing import Optional
 from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -45,20 +48,31 @@ class GitHubService:
     def _parse_github_url(self, url: str) -> tuple[str, str, str]:
         """Parse GitHub URL and return (owner, repo, branch)."""
         url = url.strip()
+        logger.info(f"🔗 Parsing GitHub URL: {url}")
+
         if not url.startswith("http"):
             url = f"https://{url}"
+            logger.debug(f"✏️  Added https prefix: {url}")
 
         # Try to extract owner/repo from URL
         match = re.search(r"github\.com[:/]([^/]+)/([^/]+)(?:/tree/([^/]+))?", url)
         if not match:
+            logger.error(f"❌ Failed to parse URL: {url}")
             raise HTTPException(
                 status_code=400,
                 detail="Invalid GitHub URL. Expected: https://github.com/owner/repo"
             )
 
         owner, repo, branch = match.groups()
-        repo = repo.rstrip(".git")
-        branch = branch or "main"  # Changed from HEAD to main
+        logger.debug(f"📋 Raw parse result - owner: {owner}, repo: {repo}, branch: {branch}")
+
+        # Remove .git suffix if present (use removesuffix, not rstrip!)
+        if repo.endswith(".git"):
+            logger.debug(f"🔪 Removing .git suffix from {repo}")
+            repo = repo[:-4]  # Remove last 4 characters (.git)
+
+        branch = branch or "main"  # Default to main branch
+        logger.info(f"✅ Parsed - owner: {owner}, repo: {repo}, branch: {branch}")
         return owner, repo, branch
 
     async def get_repo_tree(self, url: str) -> tuple[str, str, list[dict]]:
@@ -71,7 +85,11 @@ class GitHubService:
 
         try:
             # Get the commit SHA for the branch
-            ref_response = await session.get(f"/repos/{owner}/{repo}/git/ref/heads/{branch}")
+            api_url = f"/repos/{owner}/{repo}/git/ref/heads/{branch}"
+            logger.info(f"🌐 Fetching branch ref: {api_url}")
+            ref_response = await session.get(api_url)
+            logger.debug(f"📊 Branch ref response status: {ref_response.status_code}")
+
             if ref_response.status_code == 404:
                 error_detail = f"GitHub API returned 404. URL: /repos/{owner}/{repo}/git/ref/heads/{branch}. Response: {ref_response.text[:200]}"
                 raise HTTPException(
