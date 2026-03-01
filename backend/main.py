@@ -1,6 +1,6 @@
 import os
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from backend.routers import summarize
@@ -43,16 +43,26 @@ async def serve_frontend(full_path: str):
     """Serve React app for all non-API routes (SPA routing fallback)."""
     logger.debug(f"🔴 Catch-all route hit for path: {full_path}")
 
-    static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+    # Get the absolute path to the static files directory
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    static_dir = os.path.join(base_dir, "frontend", "dist")
     index_file = os.path.join(static_dir, "index.html")
 
-    # Normalize path and check for directory traversal
-    requested_file = os.path.normpath(os.path.join(static_dir, full_path))
+    logger.debug(f"📂 Static dir: {static_dir}")
+    logger.debug(f"📄 Index file: {index_file}")
+
+    # Safely join paths and resolve to absolute path
+    requested_file = os.path.abspath(os.path.join(static_dir, full_path))
 
     # Security: ensure requested_file is within static_dir
-    if not requested_file.startswith(os.path.normpath(static_dir)):
-        logger.warning(f"⚠️ Path traversal attempt: {full_path}")
-        return {"detail": "Not Found"}
+    try:
+        rel_path = os.path.relpath(requested_file, static_dir)
+        if rel_path.startswith(".."):
+            logger.warning(f"⚠️ Path traversal attempt: {full_path}")
+            raise HTTPException(status_code=404, detail="Not Found")
+    except ValueError:
+        logger.warning(f"⚠️ Invalid path: {full_path}")
+        raise HTTPException(status_code=404, detail="Not Found")
 
     logger.debug(f"📁 Checking file: {requested_file}")
 
@@ -62,7 +72,7 @@ async def serve_frontend(full_path: str):
         return FileResponse(requested_file)
 
     # For SPA routing: if it's a route (not a file), serve index.html
-    # But don't serve index.html for explicit file requests
+    # Routes don't have file extensions in the last segment
     if "." not in os.path.basename(full_path) or full_path == "":
         logger.debug(f"📄 Route not found, falling back to index.html for SPA routing")
         if os.path.isfile(index_file):
@@ -70,4 +80,4 @@ async def serve_frontend(full_path: str):
             return FileResponse(index_file, media_type="text/html")
 
     logger.error(f"❌ File not found: {requested_file}")
-    return {"detail": "Not Found"}
+    raise HTTPException(status_code=404, detail="Not Found")
