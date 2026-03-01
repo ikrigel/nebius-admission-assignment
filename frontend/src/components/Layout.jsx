@@ -37,7 +37,11 @@ const Layout = ({ children }) => {
   ]
 
   const drawer = (
-    <Box sx={{ pt: 2 }}>
+    <Box sx={{
+      pt: isMobile ? '64px' : 2, // Add AppBar height on mobile so drawer starts below it
+      height: '100%',
+      overflow: 'auto',
+    }}>
       <List>
         {navigationItems.map((item) => (
           <ListItem
@@ -117,6 +121,8 @@ const Layout = ({ children }) => {
             width: DRAWER_WIDTH,
             boxSizing: 'border-box',
             mt: { xs: 0, md: '64px' }, // Offset by AppBar height on desktop
+            maxHeight: { xs: '100vh', md: `calc(100vh - 64px)` }, // Ensure drawer doesn't overflow
+            overflow: 'auto',
           },
         }}
       >
