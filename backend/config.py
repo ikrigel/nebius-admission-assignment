@@ -48,8 +48,8 @@ class Settings:
 
         defaults = {
             "nebius": "nvidia/Llama-3_1-Nemotron-Ultra-253B-v1",
-            "openai": "gpt-3.5-turbo",
-            "anthropic": "claude-3-haiku-20240307",
+            "openai": "gpt-4o-mini",  # Updated: gpt-3.5-turbo is deprecated
+            "anthropic": "claude-3-5-haiku-20241022",  # Updated: latest Haiku model
             "perplexity": "sonar",
         }
         return defaults.get(self.llm_provider, "")
