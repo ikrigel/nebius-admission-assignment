@@ -5,7 +5,7 @@ A web application that analyzes GitHub repositories using Large Language Models 
 ## Features
 
 - **Repository Analysis**: Automatically analyze public GitHub repositories
-- **Multiple LLM Providers**: Support for Nebius, OpenAI, Anthropic, Google Gemini, and Perplexity
+- **Multiple LLM Providers**: Support for Nebius, OpenAI, Anthropic, and Perplexity
 - **Smart File Selection**: Intelligently selects the most important repository files (README, configuration, source)
 - **Search History**: Automatically tracks all analyzed repositories with timestamps and export to CSV
 - **Responsive Design**: Works seamlessly on mobile, tablet, and desktop screens
@@ -17,7 +17,7 @@ A web application that analyzes GitHub repositories using Large Language Models 
 
 ## Live Demo
 
-🚀 **Deployed on Vercel** - Coming soon at your Vercel URL
+🚀 **Deployed on Vercel** - https://nebius-admission-assignment.vercel.app/
 
 ## Prerequisites
 
@@ -45,10 +45,9 @@ pip install -r requirements.txt
 cp .env.example .env
 
 # Edit .env with your LLM API key
-# For Nebius: get key from https://tokenfactory.nebius.com/
+# For Nebius: get key from https://api.studio.nebius.ai/
 # For OpenAI: https://platform.openai.com/api-keys
 # For Anthropic: https://console.anthropic.com/
-# For Gemini: https://aistudio.google.com/app/apikey
 # For Perplexity: https://www.perplexity.ai/api
 ```
 
@@ -113,19 +112,21 @@ Expected response:
 
 ## Model Selection
 
-**Primary Model**: `meta-llama/Meta-Llama-3.1-70B-Instruct` (Nebius Token Factory)
+**Primary Model**: `nvidia/Llama-3_1-Nemotron-Ultra-253B-v1` (Nebius)
 
 **Why This Model?**
-- **128k context window**: Handles large repositories efficiently
+- **256k context window**: Handles large repositories efficiently
 - **Strong code comprehension**: Excellent at understanding software projects
-- **Cost-effective**: Free $1 credit on Nebius; sufficient for extensive testing
+- **Cost-effective**: Free credits on Nebius; sufficient for extensive testing
 - **Performance**: Fast inference times for interactive use
 
 **Alternative Models**:
-- OpenAI: `gpt-4o-mini` (recommended for production)
-- Anthropic: `claude-3-haiku-20240307`
-- Google Gemini: `gemini-1.5-flash`
+- OpenAI: `gpt-4o-mini` (lightweight, recommended for production)
+- Anthropic: `claude-3-5-haiku-20241022` (latest Claude Haiku model)
 - Perplexity: `sonar`
+
+**Model Selection in Web Interface**:
+Select your preferred provider in the **Settings** page to use that model's default, or edit `.env` to specify a custom model via `LLM_MODEL` variable.
 
 ## Repository Processing Strategy
 
@@ -268,12 +269,11 @@ All variables are optional except you need at least one LLM API key:
 
 ```bash
 # LLM Configuration
-LLM_PROVIDER=nebius                    # nebius|openai|anthropic|gemini|perplexity
-LLM_MODEL=meta-llama/...              # Optional, uses provider default
+LLM_PROVIDER=nebius                    # nebius|openai|anthropic|perplexity
+LLM_MODEL=nvidia/Llama-3_1-...        # Optional, uses provider default
 NEBIUS_API_KEY=v1.CmQKHH...          # Required if using Nebius
 OPENAI_API_KEY=sk-...                 # Required if using OpenAI
 ANTHROPIC_API_KEY=sk-ant-...         # Required if using Anthropic
-GEMINI_API_KEY=AIzaSy...              # Required if using Gemini
 PERPLEXITY_API_KEY=pplx-...           # Required if using Perplexity
 
 # GitHub (Optional, raises rate limit from 60 to 5000 req/hr)
